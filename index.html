@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Counter App</title>
+    <!-- Modern typography from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Premium color palette */
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --accent-color: #00d2ff;
+            --btn-bg: #ffffff;
+            --btn-text: #764ba2;
+            --btn-hover: #f0f0f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px;
+        }
+
+        #counter {
+            font-size: 8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+            /* Subtly animated scale/fade on value change */
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease, color 0.5s ease;
+        }
+
+        /* Animation class applied via JS */
+        .pop {
+            transform: scale(1.15);
+            opacity: 0.8;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 1rem 2.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button.secondary {
+            background-color: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background-color: var(--btn-hover);
+        }
+
+        button.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
+        }
+
+        button:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Subtle floating background effects for premium feel */
+        .bg-flare {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent-color);
+            filter: blur(100px);
+            opacity: 0.2;
+            z-index: -1;
+            border-radius: 50%;
+            transition: background 1s ease;
+        }
+
+        .flare-1 {
+            top: 10%;
+            left: 10%;
+        }
+
+        .flare-2 {
+            bottom: 10%;
+            right: 10%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-flare flare-1" id="flare-1"></div>
+    <div class="bg-flare flare-2" id="flare-2"></div>
+
+    <main class="container">
+        <!-- Large number in the center -->
+        <h1 id="counter">0</h1>
+
+        <div class="btn-group">
+            <!-- Clickable button -->
+            <button id="increment-btn">Click me</button>
+            <!-- Reset button -->
+            <button id="reset-btn" class="secondary">Reset</button>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const counterDisplay = document.getElementById('counter');
+        const incrementBtn = document.getElementById('increment-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const flares = [document.getElementById('flare-1'), document.getElementById('flare-2')];
+
+        // Logic: Initialize state from localStorage or 0
+        let count = parseInt(localStorage.getItem('counter_app_value')) || 0;
+
+        // Initial render
+        counterDisplay.textContent = count;
+
+        const colors = ['#00d2ff', '#ff00d2', '#d2ff00', '#ff8c00', '#00ff8c'];
+
+        /**
+         * Updates the counter with a smooth animation
+         */
+        function updateCounter() {
+            count++;
+            localStorage.setItem('counter_app_value', count);
+            renderUpdate();
+
+            // Change flare colors every 5 clicks for dynamic feel
+            if (count % 5 === 0) {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                flares.forEach(f => f.style.background = randomColor);
+                counterDisplay.style.color = randomColor;
+            } else {
+                counterDisplay.style.color = '#ffffff';
+            }
+        }
+
+        /**
+         * Resets the counter to 0
+         */
+        function resetCounter() {
+            count = 0;
+            localStorage.setItem('counter_app_value', count);
+            renderUpdate();
+            flares.forEach(f => f.style.background = '#00d2ff');
+            counterDisplay.style.color = '#ffffff';
+        }
+
+        /**
+         * Handles the visual update logic
+         */
+        function renderUpdate() {
+            // Apply scale/fade animation
+            counterDisplay.classList.add('pop');
+
+            // Update the text
+            counterDisplay.textContent = count;
+
+            // Remove animation class after a short delay
+            setTimeout(() => {
+                counterDisplay.classList.remove('pop');
+            }, 150);
+        }
+
+        // Event Listeners
+        incrementBtn.addEventListener('click', updateCounter);
+        resetBtn.addEventListener('click', resetCounter);
+
+        // Console log for initialization check
+        console.log('App initialized with count:', count);
+    </script>
+</body>
+
+</html>
